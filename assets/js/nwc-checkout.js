@@ -10352,6 +10352,19 @@
     // Bootstrap
     // ---------------------------------------------------------------------------
     document.addEventListener( 'DOMContentLoaded', () => {
+      // NIP-44 browser self-test (remove after debugging)
+      try {
+        const _k = nip44_exports.getConversationKey(
+          hexToBytes( '0000000000000000000000000000000000000000000000000000000000000001' ),
+          '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798'
+        );
+        const _e = nip44_exports.encrypt( 'test', _k );
+        const _d = nip44_exports.decrypt( _e, _k );
+        console.log( '[NWC] NIP-44 self-test:', _d === 'test' ? 'PASS' : 'FAIL' );
+      } catch ( _err ) {
+        console.log( '[NWC] NIP-44 self-test FAIL:', _err.message );
+      }
+
       mountConnectForm();
       mountPayButton();
       mountDisconnectButton();
