@@ -27,6 +27,7 @@ class Plugin {
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_checkout_assets' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
         add_action( 'woocommerce_thankyou_nwc_checkout', [ $this, 'render_thankyou_payment' ], 5 );
+        ( new Webhook\BtcpayWebhook() )->register();
     }
 
     private function load_classes(): void {
@@ -46,6 +47,7 @@ class Plugin {
             'Ajax/DeleteConnection.php',
             'Gateway/NWC_Gateway.php',
             'Admin/Settings.php',
+            'Webhook/BtcpayWebhook.php',
         ];
 
         foreach ( $files as $file ) {

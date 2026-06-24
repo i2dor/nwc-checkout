@@ -105,6 +105,21 @@ final class BTCPayBackend implements LightningBackend {
     // -------------------------------------------------------------------------
 
     private function createCheckoutInvoice( float $amount, string $currency, string $description, string $orderId ): Invoice|\WP_Error {
+        $notificationUrl = class_exists( '\NWCCheckout\Webhook\BtcpayWebhook' )
+            ? \NWCCheckout\Webhook\BtcpayWebhook::webhook_url()
+            : '';
+
+        $checkout = [
+            'expirationMinutes'     => 60,
+            'paymentMethods'        => [ 'BTC-LN' ],
+            'redirectURL'           => '',
+            'redirectAutomatically' => false,
+        ];
+
+        if ( $notificationUrl ) {
+            $checkout['notificationUrl'] = $notificationUrl;
+        }
+
         $response = $this->request(
             'POST',
             $this->invoicesUrl(),
@@ -112,16 +127,10 @@ final class BTCPayBackend implements LightningBackend {
                 'amount'   => (string) $amount,
                 'currency' => strtoupper( $currency ),
                 'metadata' => [
-                    'orderId'     => $orderId,
-                    'itemDesc'    => $description,
-                    'buyerName'   => '',
+                    'orderId'  => $orderId,
+                    'itemDesc' => $description,
                 ],
-                'checkout' => [
-                    'expirationMinutes' => 60,
-                    'paymentMethods'    => [ 'BTC-LN' ],
-                    'redirectURL'       => '',
-                    'redirectAutomatically' => false,
-                ],
+                'checkout' => $checkout,
             ]
         );
 

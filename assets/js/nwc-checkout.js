@@ -10619,24 +10619,46 @@
           if ( responseEvent?.kind !== 23195 ) return;
 
           let response;
-          // Try NIP-44 first (newer standard), fall back to NIP-04 (Primal, older wallets).
-          dbg( 'clientSecret len:', conn.clientSecret?.length, 'walletPubkey len:', walletPubkey?.length );
+          const eventPubkey = responseEvent.pubkey ?? '';
+          dbg( 'response event pubkey:', eventPubkey );
+          dbg( 'walletPubkey:', walletPubkey );
           dbg( 'content prefix:', responseEvent.content?.slice( 0, 4 ), 'len:', responseEvent.content?.length );
-          try {
-            const convKey  = nip44_exports.getConversationKey( clientSecretBytes, walletPubkey );
-            const decrypted = nip44_exports.decrypt( responseEvent.content, convKey );
-            response = JSON.parse( decrypted );
-            dbg( 'Decrypted (NIP-44) response:', response );
-          } catch ( e1 ) {
-            dbg( 'NIP-44 decrypt failed:', e1.message );
+
+          // Candidate sender pubkeys: the one from NWC URI and the event's actual pubkey.
+          // Some wallets (e.g. Primal) may sign responses from a different keypair.
+          const candidates = [ walletPubkey ];
+          if ( eventPubkey && eventPubkey !== walletPubkey ) {
+            candidates.push( eventPubkey );
+          }
+
+          let decryptOk = false;
+          for ( const senderPubkey of candidates ) {
+            // Try NIP-44.
             try {
-              const decrypted = await nip04_exports.decrypt( conn.clientSecret, walletPubkey, responseEvent.content );
+              const convKey   = nip44_exports.getConversationKey( clientSecretBytes, senderPubkey );
+              const decrypted = nip44_exports.decrypt( responseEvent.content, convKey );
               response = JSON.parse( decrypted );
-              dbg( 'Decrypted (NIP-04) response:', response );
-            } catch ( e2 ) {
-              dbg( 'NIP-04 decrypt failed:', e2.message );
-              return;
+              dbg( 'Decrypted (NIP-44, sender=' + senderPubkey.slice( 0, 8 ) + '):', response );
+              decryptOk = true;
+              break;
+            } catch ( e1 ) {
+              dbg( 'NIP-44 failed (sender=' + senderPubkey.slice( 0, 8 ) + '):', e1.message );
             }
+            // Try NIP-04.
+            try {
+              const decrypted = await nip04_exports.decrypt( conn.clientSecret, senderPubkey, responseEvent.content );
+              response = JSON.parse( decrypted );
+              dbg( 'Decrypted (NIP-04, sender=' + senderPubkey.slice( 0, 8 ) + '):', response );
+              decryptOk = true;
+              break;
+            } catch ( e2 ) {
+              dbg( 'NIP-04 failed (sender=' + senderPubkey.slice( 0, 8 ) + '):', e2.message );
+            }
+          }
+
+          if ( ! decryptOk ) {
+            dbg( 'All decrypt attempts failed - cannot read wallet response' );
+            return;
           }
 
           if ( ! settled ) {
