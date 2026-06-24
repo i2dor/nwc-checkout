@@ -29,6 +29,11 @@ document.addEventListener( 'DOMContentLoaded', () => {
   mountPayButton();
   mountDisconnectButton();
   interceptCheckoutSubmit();
+
+  // PHP detected a pending NWC order on the order-received page - auto-pay.
+  if ( cfg.autoOrderId ) {
+    runPaymentFlowForOrder( String( cfg.autoOrderId ) );
+  }
 } );
 
 // ---------------------------------------------------------------------------
