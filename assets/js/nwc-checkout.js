@@ -10557,6 +10557,43 @@
     // ---------------------------------------------------------------------------
     // NWC relay communication
     // ---------------------------------------------------------------------------
+    /**
+     * Query the wallet's info event (kind 13194) to detect preferred encryption.
+     * Returns 'nip44' if the wallet advertises it, 'nip04' otherwise.
+     * Resolves in under 2 s (EOSE or timeout -> default nip04).
+     */
+    async function detectWalletEncryption( ws, walletPubkey ) {
+      return new Promise( ( resolve ) => {
+        const done = ( method ) => {
+          clearTimeout( timer );
+          ws.removeEventListener( 'message', handler );
+          resolve( method );
+        };
+        // Default to nip04 after 2 s if no info event arrives.
+        const timer = setTimeout( () => done( 'nip04' ), 2000 );
+
+        function handler( msg ) {
+          let parsed;
+          try { parsed = JSON.parse( msg.data ); } catch { return; }
+          if ( ! Array.isArray( parsed ) ) return;
+
+          if ( parsed[ 0 ] === 'EVENT' && parsed[ 2 ]?.kind === 13194 && parsed[ 2 ]?.pubkey === walletPubkey ) {
+            const ev       = parsed[ 2 ];
+            // Check tags: [["encryption","nip44"]] or content containing "nip44".
+            const encTag   = ev.tags?.find( t => t[ 0 ] === 'encryption' );
+            const useNip44 = encTag?.[ 1 ] === 'nip44' || Boolean( ev.content?.includes( 'nip44' ) );
+            done( useNip44 ? 'nip44' : 'nip04' );
+          } else if ( parsed[ 0 ] === 'EOSE' && parsed[ 1 ] === 'nwc-info' ) {
+            // No info event stored on relay -> default.
+            done( 'nip04' );
+          }
+        }
+
+        ws.addEventListener( 'message', handler );
+        ws.send( JSON.stringify( [ 'REQ', 'nwc-info', { kinds: [ 13194 ], authors: [ walletPubkey ], limit: 1 } ] ) );
+      } );
+    }
+
     async function sendViaRelay( conn, bolt11 ) {
       const clientSecretBytes = hexToBytes( conn.clientSecret );
       const clientPubkey      = getPublicKey$1( clientSecretBytes );
@@ -10567,25 +10604,13 @@
         params: { invoice: bolt11 },
       } );
 
-      // Use NIP-04 for request: Primal and most NWC wallets require it.
-      const encryptedContent = await nip04_exports.encrypt( conn.clientSecret, walletPubkey, payload );
-
-      const event = finalizeEvent$1(
-        {
-          kind:       23194,
-          created_at: Math.floor( Date.now() / 1000 ),
-          tags:       [ [ 'p', walletPubkey ] ],
-          content:    encryptedContent,
-        },
-        clientSecretBytes
-      );
-
       const dbg = ( ...a ) => console.log( '[NWC]', ...a );
 
       return new Promise( ( resolve, reject ) => {
         dbg( 'Connecting to relay', conn.relay );
         const ws = new WebSocket( conn.relay );
         let settled = false;
+
         const timeout = setTimeout( () => {
           if ( settled ) return;
           settled = true;
@@ -10596,17 +10621,42 @@
           reject( err );
         }, cfg.relayTimeout ?? 15000 );
 
-        ws.addEventListener( 'open', () => {
-          dbg( 'WS open, sending EVENT kind 23194, id:', event.id );
-          // Publish request.
-          ws.send( JSON.stringify( [ 'EVENT', event ] ) );
-          // Subscribe for response: kind 23195 tagged to our pubkey for this event.
+        ws.addEventListener( 'open', async () => {
+          // 1. Detect wallet encryption preference via kind 13194.
+          const encryption = await detectWalletEncryption( ws, walletPubkey );
+          dbg( 'Wallet encryption:', encryption );
+
+          // 2. Encrypt the request with the detected method.
+          let encryptedContent;
+          if ( encryption === 'nip44' ) {
+            encryptedContent = nip44_exports.encrypt( payload, nip44_exports.getConversationKey( clientSecretBytes, walletPubkey ) );
+          } else {
+            encryptedContent = await nip04_exports.encrypt( conn.clientSecret, walletPubkey, payload );
+          }
+
+          // 3. Finalize event (ID depends on content, so done after encryption).
+          const event = finalizeEvent$1(
+            {
+              kind:       23194,
+              created_at: Math.floor( Date.now() / 1000 ),
+              tags:       [ [ 'p', walletPubkey ] ],
+              content:    encryptedContent,
+            },
+            clientSecretBytes
+          );
+          event.id;
+
+          // 4. Subscribe for the response BEFORE publishing (avoids race).
           ws.send( JSON.stringify( [
             'REQ',
             'nwc-res',
             { kinds: [ 23195 ], '#p': [ clientPubkey ], '#e': [ event.id ] },
           ] ) );
           dbg( 'REQ sent - clientPubkey:', clientPubkey, 'eventId:', event.id );
+
+          // 5. Publish the request.
+          ws.send( JSON.stringify( [ 'EVENT', event ] ) );
+          dbg( 'EVENT sent kind 23194 id:', event.id );
         } );
 
         ws.addEventListener( 'message', async ( msg ) => {
