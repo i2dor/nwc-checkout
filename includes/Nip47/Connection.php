@@ -35,7 +35,7 @@ final class Connection {
     public static function parse( string $uri ): self|\WP_Error {
         // Normalise scheme so parse_url works.
         $normalised = preg_replace( '/^nostr\+walletconnect:\/\//', 'https://', $uri );
-        $parts      = parse_url( $normalised );
+        $parts      = wp_parse_url( $normalised );
 
         if ( ! $parts ) {
             return new \WP_Error( 'nwc_parse', 'Invalid connection URI' );

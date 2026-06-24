@@ -19,8 +19,11 @@ final class PollInvoice extends AbstractAjaxHandler {
     protected bool   $nopriv = true;
 
     protected function handle(): void {
+        // Nonce verified in AbstractAjaxHandler::dispatch() via check_ajax_referer().
+        // phpcs:disable WordPress.Security.NonceVerification.Missing
         $orderId   = absint( $_POST['order_id'] ?? 0 );
-        $invoiceId = sanitize_text_field( $_POST['invoice_id'] ?? '' );
+        $invoiceId = sanitize_text_field( wp_unslash( $_POST['invoice_id'] ?? '' ) );
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
 
         if ( ! $orderId || ! $invoiceId ) {
             wp_send_json_error( 'Missing parameters', 400 );
@@ -47,6 +50,7 @@ final class PollInvoice extends AbstractAjaxHandler {
             $order->payment_complete( $invoice->preimage ?? '' );
             $order->add_order_note(
                 sprintf(
+                    /* translators: %s: BTCPay invoice ID */
                     __( 'Lightning payment confirmed via NWC. Invoice: %s', 'nwc-checkout' ),
                     $invoiceId
                 )

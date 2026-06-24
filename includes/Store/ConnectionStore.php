@@ -72,7 +72,7 @@ final class ConnectionStore {
     // -------------------------------------------------------------------------
 
     private function guestKey(): string {
-        $sid = $_COOKIE[ self::COOKIE_NAME ] ?? '';
+        $sid = sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ?? '' ) );
         if ( empty( $sid ) || strlen( $sid ) !== 64 || ! ctype_alnum( $sid ) ) {
             $sid = bin2hex( random_bytes( 32 ) );
             setcookie( self::COOKIE_NAME, $sid, time() + self::GUEST_TTL, COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true );

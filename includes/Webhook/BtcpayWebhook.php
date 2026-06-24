@@ -90,6 +90,7 @@ final class BtcpayWebhook {
         $order->payment_complete( $invoice->preimage ?? '' );
         $order->add_order_note(
             sprintf(
+                /* translators: 1: BTCPay webhook event type, 2: BTCPay invoice ID */
                 __( 'Lightning payment confirmed via BTCPay webhook. Type: %1$s. Invoice: %2$s', 'nwc-checkout' ),
                 $type,
                 $invoiceId

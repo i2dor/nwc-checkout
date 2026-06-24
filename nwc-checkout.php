@@ -51,7 +51,7 @@ add_action( 'plugins_loaded', function () {
                 . sprintf(
                     /* translators: %s: minimum WooCommerce version */
                     esc_html__( 'NWC Checkout requires WooCommerce %s or higher.', 'nwc-checkout' ),
-                    NWC_CHECKOUT_MIN_WC
+                    esc_html( NWC_CHECKOUT_MIN_WC )
                 )
                 . '</p></div>';
         } );

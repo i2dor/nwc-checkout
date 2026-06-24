@@ -19,6 +19,8 @@ final class CreateInvoice extends AbstractAjaxHandler {
     protected bool   $nopriv    = true;
 
     protected function handle(): void {
+        // Nonce verified in AbstractAjaxHandler::dispatch() via check_ajax_referer().
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
         $orderId = absint( $_POST['order_id'] ?? 0 );
         if ( ! $orderId ) {
             wp_send_json_error( 'Missing order_id', 400 );
@@ -63,6 +65,7 @@ final class CreateInvoice extends AbstractAjaxHandler {
         // Create a new BTCPay checkout invoice using the order's fiat total.
         $amount      = (float) $order->get_total();
         $currency    = strtoupper( get_woocommerce_currency() );
+        /* translators: %s: order number */
         $description = sprintf( __( 'Order #%s', 'nwc-checkout' ), $order->get_order_number() );
 
         $invoice = $backend->createInvoiceFromOrder(

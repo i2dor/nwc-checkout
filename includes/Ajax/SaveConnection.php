@@ -16,7 +16,9 @@ final class SaveConnection extends AbstractAjaxHandler {
     protected bool   $nopriv = true;
 
     protected function handle(): void {
-        $uri = sanitize_text_field( $_POST['uri'] ?? '' );
+        // Nonce verified in AbstractAjaxHandler::dispatch() via check_ajax_referer().
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        $uri = sanitize_text_field( wp_unslash( $_POST['uri'] ?? '' ) );
         if ( ! str_starts_with( $uri, 'nostr+walletconnect://' ) ) {
             wp_send_json_error( __( 'Invalid connection URI.', 'nwc-checkout' ), 400 );
         }
