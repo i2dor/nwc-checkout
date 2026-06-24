@@ -8,7 +8,7 @@ use NWCCheckout\Lightning\BTCPayBackend;
 use NWCCheckout\Gateway\NWC_Gateway;
 
 /**
- * AJAX: create a BTCPay Lightning invoice for an active WC order.
+ * AJAX: create a BTCPay checkout invoice for an active WC order.
  *
  * Called by JS just before it sends pay_invoice to the wallet relay.
  * Returns bolt11 + internal invoice ID so JS can relay it and PHP can poll.
@@ -44,31 +44,40 @@ final class CreateInvoice extends AbstractAjaxHandler {
             wp_send_json_error( 'BTCPay not configured', 500 );
         }
 
-        // Reuse existing invoice if we already created one for this order.
+        // Reuse existing invoice if we already created one for this order and it is still active.
         $existingId = $order->get_meta( '_nwc_btcpay_invoice_id', true );
         if ( $existingId ) {
             $invoice = $backend->getInvoice( $existingId );
             if ( ! is_wp_error( $invoice ) && ! $invoice->status->isTerminal() ) {
-                wp_send_json_success( [
-                    'invoiceId' => $invoice->id,
-                    'bolt11'    => $invoice->bolt11,
-                ] );
+                // Re-fetch BOLT11 in case it was not stored.
+                $bolt11 = $backend->getBolt11( $existingId );
+                if ( ! is_wp_error( $bolt11 ) && $bolt11 !== '' ) {
+                    wp_send_json_success( [
+                        'invoiceId' => $invoice->id,
+                        'bolt11'    => $bolt11,
+                    ] );
+                }
             }
         }
 
-        $amountSat = (int) round( (float) $order->get_total() / $this->getBtcPrice() * 1e8 );
-        if ( $amountSat <= 0 ) {
-            wp_send_json_error( 'Could not calculate amount in sats', 500 );
-        }
+        // Create a new BTCPay checkout invoice using the order's fiat total.
+        $amount      = (float) $order->get_total();
+        $currency    = strtoupper( get_woocommerce_currency() );
+        $description = sprintf( __( 'Order #%s', 'nwc-checkout' ), $order->get_order_number() );
 
-        $invoice = $backend->createInvoice(
-            $amountSat,
-            sprintf( __( 'Order #%s', 'nwc-checkout' ), $order->get_order_number() ),
+        $invoice = $backend->createInvoiceFromOrder(
+            $amount,
+            $currency,
+            $description,
             (string) $orderId
         );
 
         if ( is_wp_error( $invoice ) ) {
             wp_send_json_error( $invoice->get_error_message(), 502 );
+        }
+
+        if ( empty( $invoice->bolt11 ) ) {
+            wp_send_json_error( 'BTCPay did not return a Lightning invoice. Check store Lightning settings.', 502 );
         }
 
         $order->update_meta_data( '_nwc_btcpay_invoice_id', $invoice->id );
@@ -78,30 +87,5 @@ final class CreateInvoice extends AbstractAjaxHandler {
             'invoiceId' => $invoice->id,
             'bolt11'    => $invoice->bolt11,
         ] );
-    }
-
-    private function getBtcPrice(): float {
-        $cached = get_transient( 'nwc_btc_price_' . get_woocommerce_currency() );
-        if ( $cached ) {
-            return (float) $cached;
-        }
-
-        $response = wp_remote_get(
-            'https://blockchain.info/ticker',
-            [ 'timeout' => 5 ]
-        );
-
-        if ( ! is_wp_error( $response ) ) {
-            $data     = json_decode( wp_remote_retrieve_body( $response ), true );
-            $currency = strtoupper( get_woocommerce_currency() );
-            $price    = $data[ $currency ]['last'] ?? 0;
-            if ( $price > 0 ) {
-                set_transient( 'nwc_btc_price_' . $currency, $price, 60 );
-                return (float) $price;
-            }
-        }
-
-        // Fallback to gateway-configured rate.
-        return (float) get_option( 'nwc_checkout_btc_price_fallback', 0 );
     }
 }
