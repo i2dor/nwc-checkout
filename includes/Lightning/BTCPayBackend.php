@@ -11,13 +11,9 @@ defined( 'ABSPATH' ) || exit;
  *   POST /api/v1/stores/{storeId}/lightning/BTC/invoices
  *   GET  /api/v1/stores/{storeId}/lightning/BTC/invoices/{invoiceId}
  *
- * Required API key permissions (choose one set based on node type):
- *   Internal node (LND/CLN running on the BTCPay server):
- *     btcpay.server.cancreatelightninginvoiceinternalnode
- *     btcpay.server.canviewlightninginvoiceinternalnode
- *   External node (connected via REST/socket/LNDHub):
- *     btcpay.store.canlightninginvoice
- *     btcpay.store.canviewlightninginvoice
+ * Required API key permissions (store-level endpoint, both node types):
+ *   btcpay.store.cancreatelightninginvoice
+ *   btcpay.store.canviewlightninginvoice
  */
 final class BTCPayBackend implements LightningBackend {
 

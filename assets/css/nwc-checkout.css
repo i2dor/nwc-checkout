@@ -37,6 +37,24 @@
 .nwc-status--error    { background: #fdecea; color: #c62828; border-left: 3px solid #c62828; }
 .nwc-status--warning  { background: #fff8e1; color: #f57f17; border-left: 3px solid #f57f17; }
 
+/* Dark mode - OS preference */
+@media (prefers-color-scheme: dark) {
+  .nwc-status--loading  { background: #0d2a3a; color: #5bc0f5; border-left-color: #5bc0f5; }
+  .nwc-status--success  { background: #0d2a14; color: #6fcf7e; border-left-color: #6fcf7e; }
+  .nwc-status--error    { background: #2a0d0d; color: #f58080; border-left-color: #f58080; }
+  .nwc-status--warning  { background: #2a1f00; color: #f5c842; border-left-color: #f5c842; }
+  .nwc-wallet-badge     { background: #0d2a14; border-color: #2e6e32; color: #6fcf7e; }
+  .nwc-instructions     { color: #aaa; }
+}
+
+/* Dark mode - Shoptimizer theme class */
+.dark-mode .nwc-status--loading  { background: #0d2a3a; color: #5bc0f5; border-left-color: #5bc0f5; }
+.dark-mode .nwc-status--success  { background: #0d2a14; color: #6fcf7e; border-left-color: #6fcf7e; }
+.dark-mode .nwc-status--error    { background: #2a0d0d; color: #f58080; border-left-color: #f58080; }
+.dark-mode .nwc-status--warning  { background: #2a1f00; color: #f5c842; border-left-color: #f5c842; }
+.dark-mode .nwc-wallet-badge     { background: #0d2a14; border-color: #2e6e32; color: #6fcf7e; }
+.dark-mode .nwc-instructions     { color: #aaa; }
+
 /* QR fallback */
 #nwc-qr-fallback {
   text-align: center;
