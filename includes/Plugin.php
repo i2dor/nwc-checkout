@@ -110,18 +110,33 @@ class Plugin {
             true
         );
 
-        $store = new Store\ConnectionStore();
+        $store   = new Store\ConnectionStore();
         $user_id = get_current_user_id();
 
+        // On order-received page: auto-trigger NWC payment for pending orders.
+        $auto_order_id = null;
+        if ( is_wc_endpoint_url( 'order-received' ) ) {
+            $order_id = absint( get_query_var( 'order-received' ) );
+            $order    = $order_id ? wc_get_order( $order_id ) : null;
+            if ( $order
+                && $order->get_payment_method() === 'nwc_checkout'
+                && in_array( $order->get_status(), [ 'pending', 'pending-payment' ], true )
+                && $store->has_connection( $user_id ?: 0 )
+            ) {
+                $auto_order_id = $order_id;
+            }
+        }
+
         wp_localize_script( 'nwc-checkout', 'NWCCheckout', [
-            'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
-            'nonce'        => wp_create_nonce( 'nwc_checkout' ),
+            'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
+            'nonce'         => wp_create_nonce( 'nwc_checkout' ),
             'hasConnection' => $store->has_connection( $user_id ?: 0 ),
-            'gatewayId'    => 'nwc_checkout',
-            'pollInterval' => 3000,
-            'pollTimeout'  => 90000,
-            'relayTimeout' => 15000,
-            'i18n'         => [
+            'gatewayId'     => 'nwc_checkout',
+            'pollInterval'  => 3000,
+            'pollTimeout'   => 90000,
+            'relayTimeout'  => 15000,
+            'autoOrderId'   => $auto_order_id,
+            'i18n'          => [
                 'connecting'    => __( 'Connecting to wallet...', 'nwc-checkout' ),
                 'paying'        => __( 'Sending payment request...', 'nwc-checkout' ),
                 'waitingWallet' => __( 'Waiting for wallet to confirm...', 'nwc-checkout' ),

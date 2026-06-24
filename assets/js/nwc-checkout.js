@@ -10553,19 +10553,24 @@
         clientSecretBytes
       );
 
+      const dbg = ( ...a ) => console.log( '[NWC]', ...a );
+
       return new Promise( ( resolve, reject ) => {
+        dbg( 'Connecting to relay', conn.relay );
         const ws = new WebSocket( conn.relay );
         let settled = false;
         const timeout = setTimeout( () => {
           if ( settled ) return;
           settled = true;
           ws.close();
+          dbg( 'Timeout - no response from wallet after', cfg.relayTimeout ?? 15000, 'ms' );
           const err = new Error( cfg.i18n.fallback );
           err.__bolt11 = bolt11;
           reject( err );
         }, cfg.relayTimeout ?? 15000 );
 
         ws.addEventListener( 'open', () => {
+          dbg( 'WS open, sending EVENT kind 23194, id:', event.id );
           // Publish request.
           ws.send( JSON.stringify( [ 'EVENT', event ] ) );
           // Subscribe for response: kind 23195 tagged to our pubkey for this event.
@@ -10574,9 +10579,11 @@
             'nwc-res',
             { kinds: [ 23195 ], '#p': [ clientPubkey ], '#e': [ event.id ] },
           ] ) );
+          dbg( 'REQ sent - clientPubkey:', clientPubkey, 'eventId:', event.id );
         } );
 
-        ws.addEventListener( 'message', ( msg ) => {
+        ws.addEventListener( 'message', async ( msg ) => {
+          dbg( 'WS message:', msg.data );
           let parsed;
           try { parsed = JSON.parse( msg.data ); } catch { return; }
 
@@ -10586,12 +10593,21 @@
           if ( responseEvent?.kind !== 23195 ) return;
 
           let response;
+          // Try NIP-44 first (newer standard), fall back to NIP-04 (Primal, older wallets).
           try {
             const convKey  = nip44_exports.getConversationKey( clientSecretBytes, walletPubkey );
             const decrypted = nip44_exports.decrypt( responseEvent.content, convKey );
             response = JSON.parse( decrypted );
-          } catch ( e ) {
-            return;
+            dbg( 'Decrypted (NIP-44) response:', response );
+          } catch {
+            try {
+              const decrypted = await nip04_exports.decrypt( conn.clientSecret, walletPubkey, responseEvent.content );
+              response = JSON.parse( decrypted );
+              dbg( 'Decrypted (NIP-04) response:', response );
+            } catch ( e2 ) {
+              dbg( 'Both NIP-44 and NIP-04 decrypt failed:', e2 );
+              return;
+            }
           }
 
           if ( ! settled ) {
@@ -10602,13 +10618,18 @@
           }
         } );
 
-        ws.addEventListener( 'error', () => {
+        ws.addEventListener( 'error', ( e ) => {
+          dbg( 'WS error:', e );
           if ( settled ) return;
           settled = true;
           clearTimeout( timeout );
           const err = new Error( cfg.i18n.fallback );
           err.__bolt11 = bolt11;
           reject( err );
+        } );
+
+        ws.addEventListener( 'close', ( e ) => {
+          dbg( 'WS closed, code:', e.code, 'reason:', e.reason );
         } );
       } );
     }
