@@ -10608,7 +10608,7 @@
           let response;
           // Try NIP-44 first (newer standard), fall back to NIP-04 (Primal, older wallets).
           dbg( 'clientSecret len:', conn.clientSecret?.length, 'walletPubkey len:', walletPubkey?.length );
-          dbg( 'content prefix:', responseEvent.content?.slice( 0, 20 ) );
+          dbg( 'content prefix:', responseEvent.content?.slice( 0, 4 ), 'len:', responseEvent.content?.length );
           try {
             const convKey  = nip44_exports.getConversationKey( clientSecretBytes, walletPubkey );
             const decrypted = nip44_exports.decrypt( responseEvent.content, convKey );
