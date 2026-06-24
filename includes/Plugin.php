@@ -22,6 +22,7 @@ class Plugin {
         $this->register_gateway();
         $this->register_ajax();
         $this->register_account_tab();
+        ( new Admin\Settings() )->register();
 
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_checkout_assets' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
@@ -36,12 +37,14 @@ class Plugin {
             'Nip47/Connection.php',
             'Store/Encryption.php',
             'Store/ConnectionStore.php',
+            'Ajax/AbstractAjaxHandler.php',
             'Ajax/CreateInvoice.php',
             'Ajax/PollInvoice.php',
             'Ajax/SaveConnection.php',
             'Ajax/GetConnection.php',
             'Ajax/DeleteConnection.php',
             'Gateway/NWC_Gateway.php',
+            'Admin/Settings.php',
         ];
 
         foreach ( $files as $file ) {

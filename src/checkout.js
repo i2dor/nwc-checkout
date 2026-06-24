@@ -27,6 +27,7 @@ const cfg = window.NWCCheckout || {};
 document.addEventListener( 'DOMContentLoaded', () => {
   mountConnectForm();
   mountPayButton();
+  mountDisconnectButton();
   interceptCheckoutSubmit();
 } );
 
@@ -57,6 +58,27 @@ function mountConnectForm() {
       mountPayButton( true );
     } else {
       showStatus( status, res.data || cfg.i18n.error, 'error' );
+    }
+  } );
+}
+
+// ---------------------------------------------------------------------------
+// Disconnect button (checkout pay template + My Account tab)
+// ---------------------------------------------------------------------------
+function mountDisconnectButton() {
+  const btn = document.getElementById( 'nwc-disconnect-btn' );
+  if ( ! btn ) return;
+
+  btn.addEventListener( 'click', async () => {
+    if ( ! confirm( 'Disconnect your Lightning wallet from this site?' ) ) return;
+
+    btn.disabled = true;
+    const res = await ajax( 'nwc_delete_connection' );
+    if ( res.success ) {
+      cfg.hasConnection = false;
+      location.reload();
+    } else {
+      btn.disabled = false;
     }
   } );
 }
