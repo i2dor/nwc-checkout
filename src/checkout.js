@@ -240,7 +240,8 @@ async function sendViaRelay( conn, bolt11 ) {
     params: { invoice: bolt11 },
   } );
 
-  const encryptedContent = nip44.encrypt( payload, nip44.getConversationKey( clientSecretBytes, walletPubkey ) );
+  // Use NIP-04 for request: Primal and most NWC wallets require it.
+  const encryptedContent = await nip04.encrypt( conn.clientSecret, walletPubkey, payload );
 
   const event = finalizeEvent(
     {

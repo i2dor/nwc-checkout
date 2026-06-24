@@ -10567,7 +10567,8 @@
         params: { invoice: bolt11 },
       } );
 
-      const encryptedContent = nip44_exports.encrypt( payload, nip44_exports.getConversationKey( clientSecretBytes, walletPubkey ) );
+      // Use NIP-04 for request: Primal and most NWC wallets require it.
+      const encryptedContent = await nip04_exports.encrypt( conn.clientSecret, walletPubkey, payload );
 
       const event = finalizeEvent$1(
         {
