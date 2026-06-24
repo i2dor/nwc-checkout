@@ -57,13 +57,14 @@ final class BtcpayWebhook {
             return new \WP_REST_Response( [ 'error' => 'Missing invoiceId' ], 400 );
         }
 
-        // Find WC order that owns this invoice.
-        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+        // Find WC order that owns this invoice. meta_key/value are indexed in HPOS.
+        // phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
         $orders = wc_get_orders( [
             'meta_key'   => '_nwc_btcpay_invoice_id',
             'meta_value' => $invoiceId,
             'limit'      => 1,
         ] );
+        // phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 
         if ( empty( $orders ) ) {
             return new \WP_REST_Response( [ 'error' => 'Order not found for invoice ' . $invoiceId ], 404 );
