@@ -57,7 +57,7 @@ final class NWC_Gateway extends \WC_Payment_Gateway {
                 'title'       => __( 'BTCPay API Key', 'nwc-checkout' ),
                 'type'        => 'password',
                 'desc_tip'    => true,
-                'description' => __( 'Needs btcpay.server.cancreatelightninginvoiceinternalnode + btcpay.server.canviewlightninginvoiceinternalnode permissions.', 'nwc-checkout' ),
+                'description' => __( 'Needs btcpay.store.cancreatelightninginvoice + btcpay.store.canviewlightninginvoice permissions.', 'nwc-checkout' ),
             ],
             'btcpay_store_id' => [
                 'title'    => __( 'BTCPay Store ID', 'nwc-checkout' ),
