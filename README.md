@@ -17,10 +17,14 @@ One-click Lightning payments via [Nostr Wallet Connect](https://nwc.dev) (NIP-47
 
 ## Installation
 
+> **Note:** This plugin adds its own payment gateway ("Lightning (NWC)") separately from the official BTCPay for WooCommerce plugin. Both can coexist — they operate independently.
+
 1. Upload the plugin to `/wp-content/plugins/nwc-checkout/`
 2. Activate via **Plugins > Installed Plugins**
 3. Go to **WooCommerce > Settings > Payments > Lightning (NWC)**
-4. Enter BTCPay Server URL, API key, and Store ID
+4. Enter your BTCPay Server URL, Store ID, and an API key with:
+   - `btcpay.store.cancreateinvoice`
+   - `btcpay.store.canviewinvoices`
 
 ## Encryption
 

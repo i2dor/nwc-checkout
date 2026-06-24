@@ -45,11 +45,16 @@ The plugin auto-detects the wallet's preferred encryption (NIP-44 or NIP-04) via
 
 == Installation ==
 
+This plugin adds its own "Lightning (NWC)" payment gateway independently from the official BTCPay for WooCommerce plugin. Both can coexist on the same site.
+
 1. Upload the `nwc-checkout` folder to `/wp-content/plugins/`.
 2. Activate the plugin through the **Plugins** menu in WordPress.
 3. Go to **WooCommerce > Settings > Payments** and enable **Lightning (NWC)**.
-4. Enter your BTCPay Server URL, API key, and Store ID.
-5. Save settings.
+4. Enter your BTCPay Server URL and Store ID.
+5. Create a BTCPay API key with the following permissions:
+   * `btcpay.store.cancreateinvoice`
+   * `btcpay.store.canviewinvoices`
+6. Save settings.
 
 Customers can connect their NWC wallet via **My Account > Lightning Wallet**.
 
