@@ -9,7 +9,8 @@
  * WC requires at least: 8.0
  * WC tested up to: 9.9
  * Author:      i2dor
- * License:     MIT
+ * License:     GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: nwc-checkout
  * Domain Path: /languages
  */
