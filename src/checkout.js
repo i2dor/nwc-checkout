@@ -35,30 +35,39 @@ document.addEventListener( 'DOMContentLoaded', () => {
 // "Connect wallet" form
 // ---------------------------------------------------------------------------
 function mountConnectForm() {
-  const form = document.getElementById( 'nwc-connect-form' );
-  if ( ! form ) return;
+  const wrap = document.getElementById( 'nwc-connect-form' );
+  if ( ! wrap ) return;
 
-  form.addEventListener( 'submit', async ( e ) => {
-    e.preventDefault();
-    const uri    = form.querySelector( '#nwc-uri-input' )?.value?.trim() ?? '';
-    const status = form.querySelector( '#nwc-connect-status' );
+  const btn    = document.getElementById( 'nwc-connect-btn' );
+  const input  = document.getElementById( 'nwc-uri-input' );
+  const status = document.getElementById( 'nwc-connect-status' );
+
+  async function handleConnect() {
+    const uri = input?.value?.trim() ?? '';
 
     if ( ! uri.startsWith( 'nostr+walletconnect://' ) ) {
       showStatus( status, cfg.i18n.error, 'error' );
       return;
     }
 
-    setLoading( form, true );
+    if ( btn ) btn.disabled = true;
     const res = await ajax( 'nwc_save_connection', { uri } );
-    setLoading( form, false );
+    if ( btn ) btn.disabled = false;
 
     if ( res.success ) {
       cfg.hasConnection = true;
-      form.closest( '.nwc-connect-wrap' )?.remove();
+      wrap.closest( '.nwc-connect-wrap' )?.remove();
       mountPayButton( true );
     } else {
       showStatus( status, res.data || cfg.i18n.error, 'error' );
     }
+  }
+
+  btn?.addEventListener( 'click', handleConnect );
+
+  // Also allow Enter key in the input field.
+  input?.addEventListener( 'keydown', ( e ) => {
+    if ( e.key === 'Enter' ) { e.preventDefault(); handleConnect(); }
   } );
 }
 

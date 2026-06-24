@@ -11,7 +11,7 @@
     </ol>
   </div>
 
-  <form id="nwc-connect-form" novalidate>
+  <div id="nwc-connect-form">
 
     <div class="nwc-uri-field">
       <input
@@ -22,13 +22,13 @@
         autocomplete="off"
         spellcheck="false"
       >
-      <button type="submit" class="button alt">
+      <button type="button" id="nwc-connect-btn" class="button alt">
         <?php esc_html_e( 'Connect', 'nwc-checkout' ); ?>
       </button>
     </div>
 
     <p id="nwc-connect-status" class="nwc-status" aria-live="polite"></p>
 
-  </form>
+  </div>
 
 </div>
