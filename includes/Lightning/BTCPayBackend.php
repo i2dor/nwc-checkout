@@ -7,13 +7,13 @@ defined( 'ABSPATH' ) || exit;
 /**
  * BTCPay Server Greenfield API backend.
  *
- * Endpoints used:
- *   POST /api/v1/stores/{storeId}/lightning/BTC/invoices
- *   GET  /api/v1/stores/{storeId}/lightning/BTC/invoices/{invoiceId}
+ * Uses the server-level Lightning endpoint (internal node):
+ *   POST /api/v1/server/lightning/BTC/invoices
+ *   GET  /api/v1/server/lightning/BTC/invoices/{invoiceId}
  *
- * Required API key permissions (store-level endpoint, both node types):
- *   btcpay.store.cancreatelightninginvoice
- *   btcpay.store.canviewlightninginvoice
+ * Required API key permissions:
+ *   btcpay.server.cancreatelightninginvoiceinternalnode
+ *   btcpay.server.canviewlightninginvoiceinternalnode
  */
 final class BTCPayBackend implements LightningBackend {
 
@@ -77,9 +77,8 @@ final class BTCPayBackend implements LightningBackend {
 
     private function invoicesUrl(): string {
         return sprintf(
-            '%s/api/v1/stores/%s/lightning/%s/invoices',
+            '%s/api/v1/server/lightning/%s/invoices',
             $this->serverUrl,
-            rawurlencode( $this->storeId ),
             rawurlencode( $this->cryptoCode )
         );
     }
