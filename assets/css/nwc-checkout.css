@@ -1,0 +1,103 @@
+/* NWC Checkout - checkout page styles */
+
+.nwc-connect-wrap,
+.nwc-pay-wrap {
+  margin: 1em 0;
+}
+
+.nwc-connect-wrap.hidden,
+.nwc-pay-wrap.hidden {
+  display: none;
+}
+
+/* URI input */
+.nwc-uri-field {
+  display: flex;
+  gap: .5em;
+  margin: .75em 0;
+}
+
+.nwc-uri-field input[type="text"] {
+  flex: 1;
+  font-family: monospace;
+  font-size: .85em;
+}
+
+/* Status line */
+.nwc-status {
+  display: none;
+  padding: .6em .9em;
+  border-radius: 4px;
+  font-size: .9em;
+  margin: .75em 0;
+}
+
+.nwc-status--loading  { background: #e8f4fd; color: #0073aa; border-left: 3px solid #0073aa; }
+.nwc-status--success  { background: #edfaef; color: #2e7d32; border-left: 3px solid #2e7d32; }
+.nwc-status--error    { background: #fdecea; color: #c62828; border-left: 3px solid #c62828; }
+.nwc-status--warning  { background: #fff8e1; color: #f57f17; border-left: 3px solid #f57f17; }
+
+/* QR fallback */
+#nwc-qr-fallback {
+  text-align: center;
+  padding: 1em 0;
+}
+
+#nwc-qr-fallback canvas {
+  display: block;
+  margin: 0 auto .75em;
+}
+
+.nwc-copy-btn {
+  font-size: .85em;
+}
+
+/* Connected wallet badge */
+.nwc-wallet-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .4em;
+  background: #f0f9f0;
+  border: 1px solid #c3e6c3;
+  color: #2e7d32;
+  border-radius: 4px;
+  padding: .3em .7em;
+  font-size: .85em;
+  margin-bottom: .75em;
+}
+
+.nwc-wallet-badge svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+/* Disconnect link */
+.nwc-disconnect {
+  font-size: .8em;
+  color: #888;
+  cursor: pointer;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: .5em;
+}
+
+/* Pay button */
+#nwc-pay-btn {
+  width: 100%;
+}
+
+/* Instructions */
+.nwc-instructions {
+  font-size: .85em;
+  color: #555;
+  margin-bottom: .75em;
+  line-height: 1.5;
+}
+
+.nwc-instructions ol {
+  margin: .5em 0 0 1.2em;
+  padding: 0;
+}
