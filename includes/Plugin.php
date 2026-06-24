@@ -134,7 +134,7 @@ class Plugin {
             'hasConnection' => $store->has_connection( $user_id ?: 0 ),
             'gatewayId'     => 'nwc_checkout',
             'pollInterval'  => 3000,
-            'pollTimeout'   => 90000,
+            'pollTimeout'   => 3600000,
             'relayTimeout'  => 15000,
             'autoOrderId'   => $auto_order_id,
             'i18n'          => [
