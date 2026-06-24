@@ -12,10 +12,10 @@ enum InvoiceStatus: string {
 
     public static function fromBTCPay( string $status ): self {
         return match ( $status ) {
-            'Complete'  => self::Paid,
-            'Expired'   => self::Expired,
-            'Invalid'   => self::Invalid,
-            default     => self::Pending,
+            'Paid', 'Complete'  => self::Paid,
+            'Expired'           => self::Expired,
+            'Invalid'           => self::Invalid,
+            default             => self::Pending,
         };
     }
 

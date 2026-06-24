@@ -10360,6 +10360,12 @@
       // PHP detected a pending NWC order on the order-received page - auto-pay.
       if ( cfg.autoOrderId ) {
         runPaymentFlowForOrder( String( cfg.autoOrderId ) );
+      } else {
+        // TY page hook rendered #nwc-ty-wrap with the order ID.
+        const tyWrap = document.getElementById( 'nwc-ty-wrap' );
+        if ( tyWrap?.dataset.orderId ) {
+          runPaymentFlowForOrder( tyWrap.dataset.orderId );
+        }
       }
     } );
 
@@ -10723,7 +10729,8 @@
     function createStatusEl() {
       const el = document.createElement( 'p' );
       el.id = 'nwc-pay-status';
-      document.querySelector( '.nwc-pay-wrap' )?.appendChild( el );
+      const container = document.querySelector( '.nwc-pay-wrap' ) ?? document.getElementById( 'nwc-ty-wrap' );
+      container?.appendChild( el );
       return el;
     }
 

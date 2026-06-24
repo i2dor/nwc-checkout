@@ -3,7 +3,7 @@
  * Plugin Name: NWC Checkout for WooCommerce
  * Plugin URI:  https://github.com/i2dor/nwc-checkout
  * Description: One-click Lightning payments via Nostr Wallet Connect (NIP-47). Customers connect their wallet once - no QR scanning on future purchases.
- * Version:     1.0.2
+ * Version:     1.0.3
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * WC requires at least: 8.0
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NWC_CHECKOUT_VERSION', '1.0.2' );
+define( 'NWC_CHECKOUT_VERSION', '1.0.3' );
 define( 'NWC_CHECKOUT_FILE', __FILE__ );
 define( 'NWC_CHECKOUT_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NWC_CHECKOUT_URL', plugin_dir_url( __FILE__ ) );
