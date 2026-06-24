@@ -2,7 +2,7 @@
 Contributors: i2dor
 Tags: lightning, bitcoin, nostr, woocommerce, payment gateway
 Requires at least: 6.4
-Tested up to: 6.7
+Tested up to: 7.0
 Stable tag: 1.1.1
 Requires PHP: 8.1
 License: GPL-2.0-or-later

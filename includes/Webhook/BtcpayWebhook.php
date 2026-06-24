@@ -58,6 +58,7 @@ final class BtcpayWebhook {
         }
 
         // Find WC order that owns this invoice.
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
         $orders = wc_get_orders( [
             'meta_key'   => '_nwc_btcpay_invoice_id',
             'meta_value' => $invoiceId,
