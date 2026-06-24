@@ -35,15 +35,16 @@ document.addEventListener( 'DOMContentLoaded', () => {
 // "Connect wallet" form
 // ---------------------------------------------------------------------------
 function mountConnectForm() {
-  const wrap = document.getElementById( 'nwc-connect-form' );
-  if ( ! wrap ) return;
-
-  const btn    = document.getElementById( 'nwc-connect-btn' );
-  const input  = document.getElementById( 'nwc-uri-input' );
-  const status = document.getElementById( 'nwc-connect-status' );
+  // Use event delegation - WooCommerce re-renders payment fields via AJAX
+  // (update_checkout), replacing DOM nodes and invalidating direct listeners.
 
   async function handleConnect() {
-    const uri = input?.value?.trim() ?? '';
+    const btn    = document.getElementById( 'nwc-connect-btn' );
+    const input  = document.getElementById( 'nwc-uri-input' );
+    const status = document.getElementById( 'nwc-connect-status' );
+    if ( ! input ) return;
+
+    const uri = input.value.trim();
 
     if ( ! uri.startsWith( 'nostr+walletconnect://' ) ) {
       showStatus( status, cfg.i18n.error, 'error' );
@@ -56,18 +57,25 @@ function mountConnectForm() {
 
     if ( res.success ) {
       cfg.hasConnection = true;
-      wrap.closest( '.nwc-connect-wrap' )?.remove();
+      document.getElementById( 'nwc-connect-form' )
+        ?.closest( '.nwc-connect-wrap' )?.remove();
       mountPayButton( true );
     } else {
       showStatus( status, res.data || cfg.i18n.error, 'error' );
     }
   }
 
-  btn?.addEventListener( 'click', handleConnect );
+  // Delegated click on the Connect button.
+  document.body.addEventListener( 'click', ( e ) => {
+    if ( e.target.closest( '#nwc-connect-btn' ) ) handleConnect();
+  } );
 
-  // Also allow Enter key in the input field.
-  input?.addEventListener( 'keydown', ( e ) => {
-    if ( e.key === 'Enter' ) { e.preventDefault(); handleConnect(); }
+  // Delegated Enter key in the URI input.
+  document.body.addEventListener( 'keydown', ( e ) => {
+    if ( e.key === 'Enter' && e.target.id === 'nwc-uri-input' ) {
+      e.preventDefault();
+      handleConnect();
+    }
   } );
 }
 
