@@ -10516,11 +10516,19 @@
 
         // 3. Send pay_invoice via NWC relay.
         showStatus( status, cfg.i18n.paying, 'loading' );
-        const relayResult = await sendViaRelay( conn, bolt11 );
+        let walletResponse;
+        try {
+          walletResponse = await sendViaRelay( conn, bolt11 );
+        } catch ( relayErr ) {
+          // Timeout or WS error: show QR and keep polling (wallet may still pay in background).
+          await showQRFallback( relayErr.__bolt11 ?? bolt11, status );
+          await pollUntilPaid( orderId, invoiceId, status );
+          return;
+        }
 
-        if ( relayResult.error ) {
+        if ( walletResponse?.error ) {
           // Wallet returned an error (e.g. insufficient funds).
-          throw new Error( relayResult.error.message || cfg.i18n.error );
+          throw new Error( walletResponse.error.message || cfg.i18n.error );
         }
 
         // 4. Poll BTCPay until confirmed or timeout.
@@ -10529,13 +10537,7 @@
 
       } catch ( err ) {
         console.error( '[NWC Checkout]', err );
-
-        // Fallback: show QR if we have bolt11.
-        if ( err.__bolt11 ) {
-          showQRFallback( err.__bolt11, status );
-        } else {
-          showStatus( status, err.message || cfg.i18n.error, 'error' );
-        }
+        showStatus( status, err.message || cfg.i18n.error, 'error' );
       }
     }
 
@@ -10605,18 +10607,21 @@
 
           let response;
           // Try NIP-44 first (newer standard), fall back to NIP-04 (Primal, older wallets).
+          dbg( 'clientSecret len:', conn.clientSecret?.length, 'walletPubkey len:', walletPubkey?.length );
+          dbg( 'content prefix:', responseEvent.content?.slice( 0, 20 ) );
           try {
             const convKey  = nip44_exports.getConversationKey( clientSecretBytes, walletPubkey );
             const decrypted = nip44_exports.decrypt( responseEvent.content, convKey );
             response = JSON.parse( decrypted );
             dbg( 'Decrypted (NIP-44) response:', response );
-          } catch {
+          } catch ( e1 ) {
+            dbg( 'NIP-44 decrypt failed:', e1.message );
             try {
               const decrypted = await nip04_exports.decrypt( conn.clientSecret, walletPubkey, responseEvent.content );
               response = JSON.parse( decrypted );
               dbg( 'Decrypted (NIP-04) response:', response );
             } catch ( e2 ) {
-              dbg( 'Both NIP-44 and NIP-04 decrypt failed:', e2 );
+              dbg( 'NIP-04 decrypt failed:', e2.message );
               return;
             }
           }
