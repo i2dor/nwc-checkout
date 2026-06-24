@@ -85,7 +85,9 @@ class Plugin {
             include NWC_CHECKOUT_DIR . 'templates/account/wallet-tab.php';
         } );
 
-        add_rewrite_endpoint( 'nwc-wallet', EP_ROOT | EP_PAGES );
+        add_action( 'init', function () {
+            add_rewrite_endpoint( 'nwc-wallet', EP_ROOT | EP_PAGES );
+        } );
     }
 
     public function enqueue_checkout_assets(): void {
