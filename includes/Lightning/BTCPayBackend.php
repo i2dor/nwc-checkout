@@ -91,8 +91,9 @@ final class BTCPayBackend implements LightningBackend {
         }
 
         // Response is a list of payment method objects.
+        // BTCPay uses 'paymentMethodId' (not 'paymentMethod') in this endpoint.
         foreach ( $response as $pm ) {
-            $method = $pm['paymentMethod'] ?? '';
+            $method = $pm['paymentMethodId'] ?? $pm['paymentMethod'] ?? '';
             if ( in_array( $method, [ 'BTC-LN', 'BTC-LNURL' ], true ) ) {
                 return $pm['destination'] ?? '';
             }
