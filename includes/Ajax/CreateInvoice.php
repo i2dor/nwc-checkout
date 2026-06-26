@@ -31,6 +31,12 @@ final class CreateInvoice extends AbstractAjaxHandler {
             wp_send_json_error( 'Order not found', 404 );
         }
 
+        // For logged-in users, verify the order belongs to them.
+        $current_user_id = get_current_user_id();
+        if ( $current_user_id && (int) $order->get_customer_id() !== $current_user_id ) {
+            wp_send_json_error( 'Order does not belong to current user', 403 );
+        }
+
         if ( $order->get_payment_method() !== 'nwc_checkout' ) {
             wp_send_json_error( 'Wrong payment method', 400 );
         }

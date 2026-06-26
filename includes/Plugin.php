@@ -158,8 +158,8 @@ class Plugin {
 
         // Order already paid (webhook completed it before TY page loaded).
         if ( $order->is_paid() ) {
-            echo '<div style="margin:1.5em 0;padding:1em 1.25em;background:#d4edda;border:1px solid #c3e6cb;border-radius:4px;">'
-                . '<strong style="color:#155724;">&#10003; ' . esc_html__( 'Plată confirmată! Comanda ta a fost procesată.', 'nwc-checkout' ) . '</strong>'
+            echo '<div class="nwc-payment-confirmed">'
+                . '<strong>&#10003; ' . esc_html__( 'Payment confirmed! Your order has been processed.', 'nwc-checkout' ) . '</strong>'
                 . '</div>';
             return;
         }

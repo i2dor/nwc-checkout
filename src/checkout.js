@@ -11,8 +11,8 @@ import {
   getPublicKey,
   finalizeEvent,
 } from 'nostr-tools/pure';
-import { nip44, nip04 } from 'nostr-tools';
-import { SimplePool } from 'nostr-tools/pool';
+import * as nip44 from 'nostr-tools/nip44';
+import * as nip04 from 'nostr-tools/nip04';
 import { hexToBytes } from '@noble/hashes/utils';
 import QRCode from 'qrcode';
 

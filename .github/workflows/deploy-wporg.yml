@@ -14,11 +14,11 @@ jobs:
       - name: Build assets
         run: |
           npm ci
-          npm run build
+          npm run build:prod
 
       - name: Deploy to WordPress.org
         uses: 10up/action-wordpress-plugin-deploy@stable
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          SLUG: nwc-checkout
+          SLUG: btcprepaid-nwc-payments

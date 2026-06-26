@@ -1,14 +1,14 @@
 <?php
 /**
- * Plugin Name: NWC Checkout for WooCommerce
+ * Plugin Name: btcprepaid Lightning Payments with Nostr Wallet Connect for WooCommerce
  * Plugin URI:  https://github.com/i2dor/nwc-checkout
  * Description: One-click Lightning payments via Nostr Wallet Connect (NIP-47). Customers connect their wallet once - no QR scanning on future purchases.
- * Version:     1.1.1
+ * Version:     1.1.2
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * WC requires at least: 8.0
  * WC tested up to: 9.9
- * Author:      i2dor
+ * Author:      btcprepaid
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: nwc-checkout
@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NWC_CHECKOUT_VERSION', '1.1.1' );
+define( 'NWC_CHECKOUT_VERSION', '1.1.2' );
 define( 'NWC_CHECKOUT_FILE', __FILE__ );
 define( 'NWC_CHECKOUT_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NWC_CHECKOUT_URL', plugin_dir_url( __FILE__ ) );
@@ -39,7 +39,7 @@ add_action( 'plugins_loaded', function () {
     if ( ! class_exists( 'WooCommerce' ) ) {
         add_action( 'admin_notices', function () {
             echo '<div class="error"><p>'
-                . esc_html__( 'NWC Checkout requires WooCommerce to be active.', 'nwc-checkout' )
+                . esc_html__( 'btcprepaid Lightning Payments with Nostr Wallet Connect requires WooCommerce to be active.', 'nwc-checkout' )
                 . '</p></div>';
         } );
         return;
@@ -50,7 +50,7 @@ add_action( 'plugins_loaded', function () {
             echo '<div class="error"><p>'
                 . sprintf(
                     /* translators: %s: minimum WooCommerce version */
-                    esc_html__( 'NWC Checkout requires WooCommerce %s or higher.', 'nwc-checkout' ),
+                    esc_html__( 'btcprepaid Lightning Payments with Nostr Wallet Connect requires WooCommerce %s or higher.', 'nwc-checkout' ),
                     esc_html( NWC_CHECKOUT_MIN_WC )
                 )
                 . '</p></div>';
